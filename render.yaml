@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: background-removal-api
+    env: python
+    runtime: python-3.11
+    buildCommand: ./build.sh
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 1 --timeout 300 --preload app:app
+    plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: FLASK_ENV
+        value: production
+    healthCheckPath: /health
+    disk:
+      name: background-removal-disk
+      size: 2GB
+      mountPath: /tmp
+    autoDeploy: false
+    branch: main
+    buildFilter:
+      paths:
+        - "**/*.py"
+        - "render.yaml"
+        - "requirements.txt"
+    scaling:
+      minInstances: 1
+      maxInstances: 2
+      targetMemoryPercent: 80
+      targetCPUPercent: 80
